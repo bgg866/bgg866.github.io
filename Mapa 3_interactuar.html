@@ -1,0 +1,108 @@
+<!DOCTYPE html> 
+<html>
+<meta charset="utf-8" />
+	<head>
+	
+<!--   La hoja de estilos, que vamos a cargar:                                        -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+
+
+<!--   La libreria javascript que vamos a utilizar , **** asegurate siempre de poner antes la hoja de estilos***  -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+	
+
+  <script type="text/javascript">     // Aqui empieza el codigo javascript
+    
+    function EjecutaElCodigo() {
+    var latitud = document.getElementById("latitud").value;    // Nos da la latitud (de -90 a 90)
+    var longitud= document.getElementById("longitud").value;         // Nos da la longitud (-180 a 180)
+    var nivel_zoom  = document.getElementById("nivel_zoom").value;         // Nos da el nivel de zoom (entre 0 y 28)
+    // var la_opcion= document.getElementById("aceptar").checked;  // True or false
+    centramapa (latitud, longitud, nivel_zoom);
+    }
+
+
+function centramapa(latitud, longitud, el_zoom) {                  // Aqui tenemos el control más importante
+        var correcto=true;
+        latitud=parseFloat(latitud);
+        longitud=parseFloat(longitud);
+        el_zoom=parseFloat(el_zoom);
+
+
+        if (latitud<-89.9 || latitud>89.9) {
+            alert ("Latitud incorrecta revise los valores limites");
+            correcto=false;
+          }
+
+        if (longitud<-180 || longitud>180) {
+            alert ("Longitud incorrecta revise los valores limites");
+            correcto=false;
+          }
+
+         if (el_zoom<0 || el_zoom>18) {
+            alert ("Zoom incorrecta revise los valores limites");
+            correcto=false;
+          }
+
+    if (correcto==true) {
+           map.setView([latitud, longitud], el_zoom);
+       }
+   }
+
+
+    function IniciaMapa() {
+      map.setView([42.839,-2.674], 13);
+    }
+
+  </script>
+
+
+
+	
+	<style>
+	#zona_reservada_map {
+		width: 95%;
+		height: 700px; 
+		box-shadow: 5px 5px 5px #777;
+	}
+
+</style>
+</head>
+<body>
+	<h1> Con leaflet:   CONTROL.HTML</h1>
+<div id="zona_reservada_map"></div>
+
+<form name="formulario1">   <!-- Aqui se crea un formulario sencillo de nombre formulario1-->
+        <h3>Datos interactivos entre el mapa y la página web</h3>
+        Longitud (-180 a 180): <input id="longitud" type="text" name="longitud" maxlength="12">  
+        Latitud (-89.8 a 89.8): <input id="latitud" type="text" name="latitud" maxlength="12">  
+        Zoom (0-18): <input id="nivel_zoom" type="text" name="nivel_zoom" maxlength="2">  <br><br>
+        <button type="button" onclick="EjecutaElCodigo()"> CENTRAR ZOOM </button>    <!-- este es el boton para continuar o hacer algo-->
+        <button type="button" onclick="IniciaMapa()"> AL ORIGEN </button>            <!-- Centrado original -->
+
+    </form>
+
+<script>
+	// Vamos a cargar una capa base de open street map, lo haremos como un tile layer. Para ello habrá que definirle la URL, el texto con la atribución y el máximo nivel de zoom de la capa.
+	var capaBASE = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+		maxZoom: 25,
+	});
+
+
+
+   var map =  L.map('zona_reservada_map', {   // La creamos dentro de una función Recordad el ámbito de las variables de fuera a dentro SI De dentro de la función a fuera NO. 
+    center: [42.839, -2.674],               // Primero latitud y luego longitud
+    zoom: 13,
+    layers: capaBASE,
+    });
+
+	// Recordad hasta ahora solamente le hemos dicho que queremos la capa de OSM (Open Street MAP)
+  // Todo el codigo lo hemos puesto en la cabecera por limpieza
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<!-- Cargamos las librerias de Open Layers y la hoja de estilos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/css/ol.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
+
+   <!--  Añadimos el control de capas en openlayers       -->
+	<link rel="stylesheet" href="ol-layerswitcher-master/src/ol-layerswitcher.css" type="text/css"/>
+	<script src="ol-layerswitcher-master/dist/ol-layerswitcher.js"></script>
+
+
+
+	<style>   
+	 #mibloquemapa {                       /* Asignaremos estos valores a nuestro id=mibloquemapa es decir al mapa que crearemos*/
+	width: 90%;                           /*Que la anchura sea el 50% de la pantalla web*/
+	height: 600px;                        /* Le decimos que el mapa de 600 pixeles de alto*/
+	box-shadow: 10px 10px 10px rgb(255,0,0);   /* le damos un sombreado y el color un azul intenso hexadecimal   */
+	}
+	.ol-mouse-position {
+		font-size:20px;
+		font-family: Arial black;
+		top:5px;
+		right:5px;
+		position:absolute;
+	}
+	</style>
+</head>
+<body>
+	<h1>EJERCICIO   FINAL     DE     OPENLAYERS</h1>
+	<h2>Archivo: OPEN_LAYERS_Y.HTML</h2>
+	<div id= 'mibloquemapa'></div>				
+
+<script>
+	var controles = ol.control.defaults().extend([
+		new ol.control.FullScreen(),                    // El orden de los controles es importante ya que el último tapa a los anteriores
+		new ol.control.ZoomSlider(),
+		new ol.control.ScaleLine(),
+		new ol.control.OverviewMap(),
+		new ol.control.ZoomToExtent (), 
+		new ol.control.MousePosition({projection: 'EPSG:4326',  coordinateFormat: function(coordinate) { return ol.coordinate.format(coordinate, '{y}, {x}', 6); }
+  }),
+		]);
+
+
+
+var Estilo_Superficies = function(feature) {          // cuando queremos leer toda la base de datos gráfica function (feature)
+	return [new ol.style.Style({ 
+		   fill: new ol.style.Fill({ 
+				color: 'orange', 
+				}),
+		})]; 
+};
+
+var Estilo_Lineas = [
+     new ol.style.Style({
+          stroke: new ol.style.Stroke({
+           color: 'red',
+           width: 3}),
+     })];
+
+
+
+var CapaBase= new ol.layer.Tile ({ title: 'Capa base OSM', type:'base', visible:true, source: new ol.source.OSM()});    // Creamos una capa base
+var CapaBaseStamen = new ol.layer.Tile({title: 'Capa base stamen', type:'base', visible:false,source: new ol.source.Stamen({layer: 'toner'})});
+var CapaBaseBing = new ol.layer.Tile({ title: 'Capa base Bing', type:'base', visible:false,source: new ol.source.BingMaps({key: 'AkGbxXx6tDWf1swIhPJyoAVp06H0s0gDTYslNWWHZ6RoPqMpB9ld5FY1WutX8UoF', imagerySet:'Road'})});
+
+
+var MapaRasterIGN = new ol.layer.Image({ title: 'Capa base IGN', type:'base', visible:false,source: new ol.source.ImageWMS({      // Paciencia a veces le cuesta cargar
+	url: 'http://www.ign.es/wms-inspire/mapa-raster',
+	params: {LAYERS: 'mtn_rasterizado'},})
+});
+
+var MapaPNOA = new ol.layer.Image({ title: 'Capa base PNOA', type:'base', visible:false, source: new ol.source.ImageWMS({      // Paciencia a veces le cuesta cargar
+	url: 'http://www.ign.es/wms-inspire/pnoa-ma',						
+	params: {LAYERS: 'OI.OrthoimageCoverage'},})
+});
+
+// Hay métodos para que se cargen mucho más rápidos los mapas del IGN en formato teselados. Pero no vamos a entrar en ello para no complicarlo más.
+
+
+var fuente1 = new ol.source.Vector ({
+	format: new ol.format.GeoJSON(),
+		url:'Parcelas de catastro.geojson'
+	});
+
+var fuente2 = new ol.source.Vector ({
+	format: new ol.format.GeoJSON(),
+		url:'Limite_costas.geojson'
+	});
+
+
+var capa_superficial= new ol.layer.Vector ({ 
+	        title:'Parcelas de catastro',
+		    source: fuente1,
+		    projection: 'EPSG:4326',
+		    style:Estilo_Superficies,
+		    opacity:0.25,
+		    visible:true,
+	});    // Creamos una capa_superficial   solo nos interesa el poligono
+
+
+var capa_lineal= new ol.layer.Vector ({ 
+	        title:'Límite de costas',
+		    source: fuente2,
+		    projection: 'EPSG:4326',
+		    style:Estilo_Lineas,
+		    visible:true,
+	});    // Creamos una capa_lineal
+
+
+
+
+
+var lavista= new ol.View({ center: ol.proj.fromLonLat([-0.792384,37.8143]), 
+							//projection: 'EPSG:4326',
+							zoom: 17});
+
+
+
+var mimapa = new ol.Map({
+	target: 'mibloquemapa',
+	layers: [new ol.layer.Group ({title: 'Mapas base', layers: [CapaBase, CapaBaseStamen, CapaBaseBing, MapaRasterIGN, MapaPNOA]}),
+			 new ol.layer.Group ({title: 'Superpuestos', layers: [capa_superficial,capa_lineal]})],
+	view: lavista,
+	controls:controles,
+	});
+  
+
+
+var layerSwitcher = new ol.control.LayerSwitcher({tipLabel: 'Leyenda'});
+mimapa.addControl(layerSwitcher); 
+layerSwitcher.showPanel();
+
+
+
+
+ </script>
+</body>
+</html>
